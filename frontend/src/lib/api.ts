@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3333';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333';
 
 const GENERIC_ERROR_MESSAGE = 'Algo salió mal. Intenta de nuevo.';
 
@@ -48,7 +48,12 @@ export async function apiRequest<T>(
   const json = await response.json().catch(() => null);
 
   if (!response.ok) {
-    const message = json?.errors?.[0]?.message ?? GENERIC_ERROR_MESSAGE;
+    const messages = json?.errors
+      ?.map((e: { message?: string }) => e.message)
+      .filter(Boolean);
+    const message = messages?.length
+      ? messages.join(' · ')
+      : GENERIC_ERROR_MESSAGE;
     throw new ApiError(message, response.status);
   }
 

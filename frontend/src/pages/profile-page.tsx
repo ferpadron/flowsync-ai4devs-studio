@@ -32,12 +32,12 @@ export function ProfilePage() {
       })
       .catch(async (err) => {
         if (cancelled) return;
-        if (err instanceof ApiError) {
+        if (err instanceof ApiError && err.status === 401) {
           await logout();
           navigate('/login', { replace: true });
           return;
         }
-        setError('No se pudo cargar el perfil.');
+        setError('No se pudo cargar el perfil. Intenta de nuevo.');
       });
 
     return () => {
