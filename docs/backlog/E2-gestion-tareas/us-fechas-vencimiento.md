@@ -9,17 +9,17 @@
 1. DADO que estoy creando o editando una tarea sin fecha de vencimiento, CUANDO le asigno una fecha, ENTONCES la tarea queda con esa fecha y se muestra en la lista.
 2. DADO que una tarea ya tiene una fecha de vencimiento, CUANDO la modifico por otra fecha, ENTONCES la lista muestra la nueva fecha y deja de mostrar la anterior.
 3. **[PROPUESTA — pendiente PA-8]** DADO que estoy creando una tarea, CUANDO no indico ninguna fecha de vencimiento, ENTONCES la tarea se crea igualmente, sin fecha, y nunca se marca como vencida mientras no se le asigne una.
-4. **[PROPUESTA — pendiente PA-8]** DADO que estoy asignando o modificando la fecha de vencimiento de una tarea, CUANDO elijo una fecha anterior a hoy, ENTONCES el sistema me deja guardarla y la tarea pasa a mostrarse como vencida de inmediato (no se bloquea la posibilidad de fechar en el pasado).
+4. **[PROPUESTA]** DADO que estoy asignando o modificando la fecha de vencimiento de una tarea, CUANDO elijo una fecha anterior a hoy, ENTONCES el sistema me deja guardarla y la tarea pasa a mostrarse como vencida de inmediato (no se bloquea la posibilidad de fechar en el pasado).
 
 **Señalar tareas vencidas**
 
 5. DADO que una tarea no está completada y su fecha de vencimiento ya pasó, CUANDO consulto la lista de tareas, ENTONCES esa tarea se distingue visualmente del resto como vencida.
 6. DADO que una tarea no está completada y su fecha de vencimiento es hoy o futura, CUANDO consulto la lista de tareas, ENTONCES esa tarea se muestra sin ninguna marca de vencida.
-7. **[PROPUESTA — pendiente PA-8]** DADO que la fecha de vencimiento de una tarea sin completar es exactamente hoy, CUANDO consulto la lista de tareas, ENTONCES esa tarea todavía NO se marca como vencida (se considera vencida a partir del día siguiente a la fecha, no el mismo día).
+7. **[PROPUESTA]** DADO que la fecha de vencimiento de una tarea sin completar es exactamente hoy, CUANDO consulto la lista de tareas, ENTONCES esa tarea todavía NO se marca como vencida (se considera vencida a partir del día siguiente a la fecha, no el mismo día).
 
 **Dejar de estar vencida**
 
 8. DADO que una tarea está marcada como vencida, CUANDO su responsable la marca como completada, ENTONCES deja de mostrarse como vencida, aunque la fecha siga en el pasado.
 9. DADO que una tarea está marcada como vencida y sigue sin completar, CUANDO su responsable le asigna una nueva fecha de vencimiento futura, ENTONCES la tarea deja de mostrarse como vencida.
 
-> Los criterios marcados **[PROPUESTA — pendiente PA-8]** cubren un comportamiento que `docs/prd/flowsync-mvp.md` (punto abierto PA-8) todavía no ha decidido: si la fecha de vencimiento es obligatoria u opcional, y qué se hace con fechas pasadas o con el día exacto de vencimiento. Se documentan como propuesta para no perder el escenario, pero no están aprobados como regla de negocio hasta que PA-8 se cierre.
+> El criterio 3 está marcado **[PROPUESTA — pendiente PA-8]** porque `docs/prd/flowsync-mvp.md` (punto abierto PA-8) deja literalmente sin decidir si la fecha de vencimiento es obligatoria u opcional. Los criterios 4 (permitir fechas pasadas) y 7 (semántica del día exacto de vencimiento) están marcados **[PROPUESTA]** por una razón distinta: son decisiones adicionales que no fueron pedidas explícitamente y que PA-8 no cubre en su redacción actual. Ninguno de los tres criterios está aprobado como regla de negocio; cerrar PA-8 solo resolvería el criterio 3, no los otros dos.

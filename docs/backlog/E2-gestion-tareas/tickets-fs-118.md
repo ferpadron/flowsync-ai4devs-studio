@@ -14,53 +14,67 @@ Nota de dependencia externa: todos estos tickets asumen que la creación/edició
 - [ ] La migración corre limpia sobre datos ya existentes, sin perder tareas ni romper la carga de la app.
 - [ ] El esquema generado queda actualizado y commiteado junto con la migración.
 - [ ] No se ha editado a mano ningún archivo generado.
-- [ ] El campo admite quedar sin valor (la historia exige que una tarea pueda no tener fecha).
+- [ ] **[Condicional a CA-3]** El campo admite quedar sin valor, si CA-3 (opcionalidad de la fecha) se aprueba.
+
+⚠️ Dependencia de producto: CA-3 está marcado `[PROPUESTA — pendiente PA-8]` en la historia. No implementar la opcionalidad del campo como regla definitiva hasta que ese criterio sea aprobado.
 
 ## FS-118.2 — Modelo/Dominio: regla de "tarea vencida"
 
 **Tipo:** Modelo/Dominio
-**Cubre:** sin fecha, fecha pasada + no completada, fecha futura, fecha exactamente hoy, completada con fecha pasada, reprogramada a futuro tras estar vencida.
+**Cubre:** sin fecha [condicional a CA-3], fecha pasada + no completada, fecha futura, fecha exactamente hoy [condicional a CA-7], completada con fecha pasada, reprogramada a futuro tras estar vencida.
 **Dependencias:** FS-118.1
 
 **Definition of Done:**
 - [ ] La regla de si una tarea está vencida vive en la capa de dominio/modelo, no en la vista ni en el controlador.
-- [ ] Hay un test unitario por cada rama de la regla.
+- [ ] Hay un test unitario por cada rama de la regla ya aprobada; las ramas de "sin fecha" (CA-3) y "fecha exactamente hoy" (CA-7) se implementan y testean solo si esos criterios se aprueban.
 - [ ] La lógica es invocable y testeable sin pasar por una petición HTTP real.
+
+⚠️ Dependencia de producto: CA-3 está pendiente de PA-8 y CA-7 está marcado `[PROPUESTA]` en la historia. No implementar esas dos ramas como regla definitiva hasta que se aprueben.
 
 ## FS-118.3 — Endpoint/API: asignar y modificar la fecha de vencimiento
 
 **Tipo:** Endpoint/API
-**Cubre:** asignar fecha, modificarla, aceptar una fecha pasada sin rechazarla.
+**Cubre:** asignar fecha, modificarla, y [condicional a CA-4] aceptar una fecha pasada sin rechazarla.
 **Dependencias:** FS-118.1
 
 **Definition of Done:**
-- [ ] Test funcional que ejercita el endpoint real cubre: asignar fecha a una tarea sin fecha, modificarla, y aceptar una fecha pasada.
+- [ ] Test funcional que ejercita el endpoint real cubre: asignar fecha a una tarea sin fecha, modificarla.
+- [ ] **[Condicional a CA-4]** Si CA-4 se aprueba, el mismo test funcional cubre también aceptar una fecha pasada sin rechazarla.
 - [ ] Los errores de validación (si los hay) siguen el mismo formato de respuesta que el resto de la API existente.
 - [ ] Solo un usuario autenticado puede modificar la fecha (reutiliza la protección de auth ya existente).
-- [ ] No se ha añadido ninguna restricción no pedida por el criterio (p. ej., bloquear fechas pasadas).
+- [ ] No se ha añadido ninguna restricción no pedida por el criterio (p. ej., bloquear fechas pasadas) mientras CA-4 no esté decidido en ningún sentido.
+
+⚠️ Dependencia de producto: CA-4 está marcado `[PROPUESTA]` en la historia. No implementar el comportamiento de fechas pasadas como regla definitiva hasta que ese criterio sea aprobado.
 
 ## FS-118.4 — Endpoint/API: exponer si una tarea está vencida
 
 **Tipo:** Endpoint/API
-**Cubre:** tarea vencida, no vencida por fecha futura, no vencida por vencer justo hoy, consistencia tras completar/reprogramar.
+**Cubre:** tarea vencida, no vencida por fecha futura, [condicional a CA-7] no vencida por vencer justo hoy, consistencia tras completar/reprogramar.
 **Dependencias:** FS-118.2
 
 **Definition of Done:**
 - [ ] El listado de tareas expone, para cada tarea, si está vencida según la regla de dominio de FS-118.2 (sin recalcularla de forma distinta en esta capa).
-- [ ] Test funcional cubre al menos: una tarea vencida, una no vencida por fecha futura, y una no vencida por vencer justo hoy.
+- [ ] Test funcional cubre al menos: una tarea vencida y una no vencida por fecha futura.
+- [ ] **[Condicional a CA-7]** Si CA-7 se aprueba, el mismo test funcional cubre también una tarea no vencida por vencer justo hoy.
 - [ ] El resultado se mantiene consistente si se completa la tarea o se le cambia la fecha entre una consulta y otra.
+
+⚠️ Dependencia de producto: CA-7 está marcado `[PROPUESTA]` en la historia. No implementar la semántica del día exacto de vencimiento como regla definitiva hasta que ese criterio sea aprobado.
 
 ## FS-118.5 — Frontend: formulario para asignar/editar la fecha de vencimiento
 
 **Tipo:** Frontend
-**Cubre:** asignar fecha, modificarla, dejarla sin definir, aceptar una fecha pasada.
+**Cubre:** asignar fecha, modificarla, [condicional a CA-3] dejarla sin definir, [condicional a CA-4] aceptar una fecha pasada.
 **Dependencias:** FS-118.3
 
 **Definition of Done:**
-- [ ] Probado manualmente en el navegador: crear tarea sin fecha, añadirle fecha después, modificarla, y guardar una fecha pasada sin que la UI la bloquee.
+- [ ] Probado manualmente en el navegador: crear tarea con fecha, y modificarla.
+- [ ] **[Condicional a CA-3]** Si CA-3 se aprueba, probado también dejar la tarea sin fecha.
+- [ ] **[Condicional a CA-4]** Si CA-4 se aprueba, probado también guardar una fecha pasada sin que la UI la bloquee.
 - [ ] Los errores que devuelva el backend se muestran al usuario de forma comprensible, con el mismo patrón que ya usan otros formularios del frontend.
 - [ ] Usa los componentes de `src/components/ui/` ya existentes (shadcn), sin editarlos a mano.
 - [ ] `npm run build` y `npm run lint` (oxlint) pasan sin errores nuevos.
+
+⚠️ Dependencia de producto: CA-3 está pendiente de PA-8 y CA-4 está marcado `[PROPUESTA]` en la historia. No implementar esos comportamientos como regla definitiva hasta que se aprueben.
 
 ## FS-118.6 — Frontend: distinguir visualmente las tareas vencidas en la lista
 

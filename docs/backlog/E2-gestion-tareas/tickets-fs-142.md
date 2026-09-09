@@ -48,16 +48,18 @@ Nota de dependencia externa: se asume que la tarea, su atributo de estado y el l
 - [ ] Usa los componentes de `src/components/ui/` ya existentes (shadcn), sin editarlos a mano.
 - [ ] `npm run build` y `npm run lint` (oxlint) pasan sin errores nuevos.
 
-## FS-142.5 — Frontend: aviso de estado inválido y recuperación del filtro anterior
+## FS-142.5 — Frontend: aviso de estado inválido y [propuesto] recuperación del filtro anterior
 
 **Tipo:** Frontend
-**Cubre:** aviso comprensible ante un estado inválido, y recuperación del último filtro válido al descartarlo.
+**Cubre:** aviso comprensible ante un estado inválido (CA-4, aprobado), y [condicional a CA-5] recuperación del último filtro válido al descartarlo.
 **Dependencias:** FS-142.3
 
 **Definition of Done:**
 - [ ] Probado manualmente: forzar un filtro con un estado inexistente muestra un aviso comprensible al usuario, no una lista vacía silenciosa.
-- [ ] Al descartar ese aviso, la lista vuelve al último filtro válido (o a "todas las tareas" si no había ninguno aplicado), nunca se queda en blanco.
 - [ ] El aviso sigue el mismo patrón visual que ya usan otros errores del frontend (mismo componente/estilo, no uno nuevo ad hoc).
+- [ ] **[Condicional a CA-5]** Si CA-5 se aprueba: al descartar ese aviso, la lista vuelve al último filtro válido (o a "todas las tareas" si no había ninguno aplicado), nunca se queda en blanco. Hasta entonces, este punto no es una obligación ejecutable del ticket.
+
+⚠️ Dependencia de producto: CA-5 está marcado `[PROPUESTA]` en la historia. No implementar el comportamiento de recuperación del filtro como regla definitiva hasta que ese criterio sea aprobado; la parte del aviso de error (CA-4) sí es aprobada y ejecutable de forma independiente.
 
 ## FS-142.6 — Frontend: mantener el filtro activo al día con cambios en vivo
 
