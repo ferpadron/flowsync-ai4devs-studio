@@ -31,7 +31,7 @@ const rejectNull = vine.createRule(
  * es lo que hace que un título de solo espacios se rechace igual que uno vacío.
  */
 const title = () => vine.string().trim().minLength(1)
-const status = () => vine.enum(TASK_STATUSES)
+const status = () => vine.enum(TASK_STATUSES).use(rejectNull())
 const assigneeId = () => vine.number().exists({ table: 'users', column: 'id' }).use(rejectNull())
 
 /**
