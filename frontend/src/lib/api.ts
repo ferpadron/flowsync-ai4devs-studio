@@ -4,6 +4,7 @@ import type {
   LoginPayload,
   SignupPayload,
   Task,
+  TaskDetail,
   UpdateTaskPayload,
   User,
 } from '@/lib/types'
@@ -46,6 +47,8 @@ const FIELD_LABELS: Record<string, string> = {
   title: 'el título',
   status: 'el estado',
   assigneeId: 'la persona responsable',
+  dueDate: 'la fecha de vencimiento',
+  today: 'el día de referencia',
 }
 
 const label = (field?: string) => FIELD_LABELS[field ?? ''] ?? 'el campo'
@@ -87,6 +90,14 @@ function translate(error: BackendError): string {
       return field === 'assigneeId'
         ? 'Una tarea siempre tiene que tener una persona responsable.'
         : `Falta indicar ${label(field)}.`
+    case 'date':
+      return field === 'today'
+        ? 'No hemos podido determinar el día de hoy. Vuelve a cargar la página.'
+        : 'Esa fecha no existe. Usa una fecha válida del calendario.'
+    case 'notAllowed':
+      return field === 'dueDate'
+        ? 'La fecha de vencimiento se pone al abrir la tarea, no al crearla.'
+        : `Aquí no se admite ${label(field)}.`
     default:
       return `Revisa ${label(field)}.`
   }
@@ -209,14 +220,41 @@ export function createTask(
   }).then((response) => response.data)
 }
 
+/**
+ * Día de calendario local de quien mira, como `YYYY-MM-DD`.
+ *
+ * Se envía al backend para que resuelva el vencimiento contra el día correcto:
+ * el veredicto lo emite siempre el servidor, aquí solo se le dice qué día es
+ * para esta persona. No se usa `toISOString()`, que convierte a UTC y podría
+ * devolver el día anterior o el siguiente.
+ */
+function localReferenceDay(): string {
+  const now = new Date()
+  const month = String(now.getMonth() + 1).padStart(2, '0')
+  const day = String(now.getDate()).padStart(2, '0')
+
+  return `${now.getFullYear()}-${month}-${day}`
+}
+
+/** Lectura individual: la única superficie que trae fecha y vencimiento. */
+export function getTask(id: number, token: string): Promise<TaskDetail> {
+  return request<{ data: TaskDetail }>(
+    `/api/v1/tasks/${id}?today=${localReferenceDay()}`,
+    { token },
+  ).then((response) => response.data)
+}
+
 export function updateTask(
   id: number,
   payload: UpdateTaskPayload,
   token: string,
-): Promise<Task> {
-  return request<{ data: Task }>(`/api/v1/tasks/${id}`, {
-    method: 'PATCH',
-    body: payload,
-    token,
-  }).then((response) => response.data)
+): Promise<TaskDetail> {
+  return request<{ data: TaskDetail }>(
+    `/api/v1/tasks/${id}?today=${localReferenceDay()}`,
+    {
+      method: 'PATCH',
+      body: payload,
+      token,
+    },
+  ).then((response) => response.data)
 }

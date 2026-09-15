@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router'
 import { AlertCircleIcon } from 'lucide-react'
 import { useAuth } from '@/auth/use-auth'
 import { useAuthForm } from '@/auth/use-auth-form'
@@ -27,6 +28,20 @@ const STATUS_LABELS: Record<TaskStatus, string> = {
 
 /** Orden en que se ofrecen los tres destinos dentro de cada fila. */
 const STATUS_ORDER: readonly TaskStatus[] = ['pending', 'in_progress', 'done']
+
+/**
+ * Recorta una tarea a lo que la lista muestra.
+ *
+ * La actualización responde con la representación individual, que trae fecha de
+ * vencimiento y veredicto. La lista no los muestra y tampoco los guarda: se
+ * descartan aquí, en el único punto por el que pueden entrar.
+ */
+const toListEntry = ({ id, title, status, assignee }: Task): Task => ({
+  id,
+  title,
+  status,
+  assignee,
+})
 
 const FIELDS = ['title'] as const
 
@@ -93,10 +108,13 @@ export function TasksPage() {
       const updated = await updateTask(task.id, { status }, token)
 
       // Sin optimismo (D8): la fila no cambia hasta que el servidor confirma,
-      // y entonces se sustituye por la tarea que él devuelve.
+      // y entonces se sustituye por la tarea que él devuelve, recortada a lo
+      // que la lista muestra. La actualización responde con la representación
+      // individual, y la fecha y el vencimiento no entran en la lista ni
+      // siquiera en memoria.
       setTasks((current) =>
         (current ?? []).map((item) =>
-          item.id === updated.id ? updated : item,
+          item.id === updated.id ? toListEntry(updated) : item,
         ),
       )
     } catch (error: unknown) {
@@ -177,7 +195,17 @@ export function TasksPage() {
                   className="flex items-center justify-between gap-4 rounded-lg border p-4"
                 >
                   <div className="min-w-0">
-                    <p className="truncate font-medium">{task.title}</p>
+                    {/*
+                      Abrir la tarea es una forma de llegar a su vista, no un
+                      dato nuevo: la fila sigue mostrando exactamente título,
+                      responsable y estado.
+                    */}
+                    <Link
+                      to={`/tasks/${task.id}`}
+                      className="truncate font-medium hover:underline focus-visible:underline block"
+                    >
+                      {task.title}
+                    </Link>
                     <p className="text-muted-foreground truncate text-sm">
                       {task.assignee.fullName || 'Sin nombre'}
                     </p>
