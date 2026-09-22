@@ -9,6 +9,42 @@ import testUtils from '@adonisjs/core/services/test_utils'
  * nombre e iniciales, que la tarea no filtre otros datos de la cuenta —en
  * particular el email—, y que una cuenta sin nombre siga dando iniciales.
  */
+
+/**
+ * El cliente tipado de Tuyau infiere `data` como la unión entre una tarea
+ * suelta y una lista de tareas, porque `/api/v1/tasks` sirve ambas formas
+ * según el método. Estas dos funciones estrechan esa unión con una
+ * comprobación real en tiempo de ejecución (`Array.isArray`) en vez de
+ * forzar el tipo: si la forma no es la esperada, el test falla con un
+ * mensaje explícito en lugar de arrastrar un `undefined` silencioso.
+ */
+function assertIsTask<T>(data: T | T[]): T {
+  if (Array.isArray(data)) {
+    throw new Error('Se esperaba una tarea, no una lista de tareas')
+  }
+  return data
+}
+
+function assertIsTaskList<T>(data: T | T[]): T[] {
+  if (!Array.isArray(data)) {
+    throw new Error('Se esperaba una lista de tareas, no una tarea suelta')
+  }
+  return data
+}
+
+/**
+ * El `assignee` llega tipado como opcional porque el transformer lo carga con
+ * `whenLoaded`; en todas las respuestas que se prueban aquí la tarea siempre
+ * trae su responsable cargado, así que un `undefined` real es un fallo, no
+ * un caso a tolerar.
+ */
+function assertDefined<T>(value: T | undefined): T {
+  if (value === undefined) {
+    throw new Error('Se esperaba un assignee y llegó undefined')
+  }
+  return value
+}
+
 test.group('Tasks | responsable', (group) => {
   group.each.setup(() => testUtils.db().withGlobalTransaction())
 
@@ -35,7 +71,7 @@ test.group('Tasks | responsable', (group) => {
 
     creada.assertStatus(201)
 
-    const { assignee } = creada.body().data
+    const assignee = assertDefined(assertIsTask(creada.body().data).assignee)
     assert.equal(assignee.fullName, 'Ada Lovelace')
     assert.equal(assignee.initials, 'AL')
   })
@@ -51,7 +87,7 @@ test.group('Tasks | responsable', (group) => {
       .header('Authorization', `Bearer ${token}`)
       .json({ title: 'Revisar el informe' })
 
-    const id = creada.body().data.id
+    const id = assertIsTask(creada.body().data).id
 
     const lista = await client.get('/api/v1/tasks').header('Authorization', `Bearer ${token}`)
 
@@ -62,9 +98,9 @@ test.group('Tasks | responsable', (group) => {
 
     // El scenario habla de «cualquier tarea, suelta o dentro de la lista»: se
     // comprueban las tres formas en las que puede llegar un assignee.
-    const assigneeAlCrear = creada.body().data.assignee
-    const assigneeEnLista = lista.body().data[0].assignee
-    const assigneeSuelta = suelta.body().data.assignee
+    const assigneeAlCrear = assertDefined(assertIsTask(creada.body().data).assignee)
+    const assigneeEnLista = assertDefined(assertIsTaskList(lista.body().data)[0].assignee)
+    const assigneeSuelta = assertDefined(assertIsTask(suelta.body().data).assignee)
 
     for (const assignee of [assigneeAlCrear, assigneeEnLista, assigneeSuelta]) {
       assert.notProperty(assignee, 'email')
@@ -72,10 +108,7 @@ test.group('Tasks | responsable', (group) => {
     }
   })
 
-  test('una cuenta sin nombre sigue dando iniciales para su tarea', async ({
-    client,
-    assert,
-  }) => {
+  test('una cuenta sin nombre sigue dando iniciales para su tarea', async ({ client, assert }) => {
     const token = await sesion(client, { fullName: null, email: 'sin-nombre@example.com' })
 
     const creada = await client
@@ -83,7 +116,7 @@ test.group('Tasks | responsable', (group) => {
       .header('Authorization', `Bearer ${token}`)
       .json({ title: 'Revisar el informe' })
 
-    const { assignee } = creada.body().data
+    const assignee = assertDefined(assertIsTask(creada.body().data).assignee)
     assert.isNull(assignee.fullName)
     assert.isString(assignee.initials)
     assert.isNotEmpty(assignee.initials)
