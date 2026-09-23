@@ -33,6 +33,10 @@ Esta es una decisión hacia delante, no una descripción de todo lo ya ocurrido:
 
 ## Estado
 
+Vigente. El [ADR 0002](0002-tests-como-fuente-de-verdad-ejecutable.md) documenta un escenario futuro e hipotético que reemplazaría a este ADR únicamente si llegara a adoptarse; mientras no se adopte, esta decisión sigue en pie.
+
+Lo que sigue es el estado tal como se creía cuando se tomó esta decisión, y se conserva sin reescribir:
+
 Aceptado. Ya en uso: los tres changes archivados siguen exactamente esta estructura. `specs/tasks/spec.md` es hoy el resultado acumulado de fusionar sus tres delta-specs; `specs/auth/spec.md` solo lo es en parte, porque la mayoría de sus requisitos preceden al historial de changes que se conserva.
 
 ## Consecuencias
