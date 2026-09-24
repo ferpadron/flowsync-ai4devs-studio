@@ -13,5 +13,5 @@
 
 ## 3. Aplicar y archivar
 
-- [ ] 3.1 Fusionar la delta-spec de este change en `openspec/specs/tasks/spec.md` (`openspec archive`)
-- [ ] 3.2 Archivar el change, solo después de completar el punto 2 — aplicar y archivar sin ese test repetiría el patrón de `add-task-status-filter`, que documentó comportamiento sin ninguna prueba que lo sostuviera
+- [x] 3.1 Fusionar la delta-spec de este change en `openspec/specs/tasks/spec.md` (`openspec archive`)
+- [x] 3.2 Archivar el change, solo después de completar el punto 2 — aplicar y archivar sin ese test repetiría el patrón de `add-task-status-filter`, que documentó comportamiento sin ninguna prueba que lo sostuviera
