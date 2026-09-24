@@ -6,10 +6,10 @@
 
 ## 2. Verificación (antes de aplicar y archivar)
 
-- [ ] 2.1 Escribir un test funcional nuevo de `PUT /api/v1/tasks/:id/due-date` (no existe hoy ninguno) que compruebe que, sin `today` en el body, la respuesta es `422` señalando el campo `today`, y que la tarea conserva la fecha que tuviera antes de la petición
-- [ ] 2.2 En el mismo test o en otro del mismo fichero, comprobar que una petición con `dueDate` y `today` responde `200` con `isOverdue` ya resuelto contra ese `today` en la misma respuesta
-- [ ] 2.3 Ejecutar ese fichero de test y confirmar que pasa contra el código actual (no debería hacer falta ningún cambio de producción: esta corrección es solo de la spec)
-- [ ] 2.4 Ejecutar la suite completa del backend, typecheck y lint
+- [x] 2.1 Escribir un test funcional nuevo de `PUT /api/v1/tasks/:id/due-date` (no existe hoy ninguno) que compruebe que, sin `today` en el body, la respuesta es `422` señalando el campo `today`, y que la tarea conserva la fecha que tuviera antes de la petición
+- [x] 2.2 En el mismo test o en otro del mismo fichero, comprobar que una petición con `dueDate` y `today` responde `200` con `isOverdue` ya resuelto contra ese `today` en la misma respuesta
+- [x] 2.3 Ejecutar ese fichero de test y confirmar que pasa contra el código actual (no debería hacer falta ningún cambio de producción: esta corrección es solo de la spec) — `backend/tests/functional/tasks/due_date.spec.ts`, 2/2 en verde sin tocar producción
+- [x] 2.4 Ejecutar la suite completa del backend, typecheck y lint — 28/28 tests, typecheck y lint en verde
 
 ## 3. Aplicar y archivar
 
