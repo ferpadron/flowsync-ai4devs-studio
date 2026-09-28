@@ -1,0 +1,29 @@
+name: OpenAPI contract
+
+on:
+  pull_request:
+    branches: [main, s5/start]
+  push:
+    branches: [main, s5/start]
+
+permissions:
+  contents: read
+
+jobs:
+  openapi-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci
+      - run: cp .env.example .env
+      - run: node ace generate:key
+      - run: npm run openapi:check
