@@ -1,0 +1,83 @@
+name: Revisor
+
+# Una revisión de Claude sobre cada cambio propuesto, publicada en el propio PR.
+# Es solo informativa: no bloquea el merge y no está en la protección de rama.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+# Nada por defecto: el job declara abajo lo que necesita.
+permissions: {}
+
+jobs:
+  review:
+    name: Revisión adversarial del cambio
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    permissions:
+      # Leer el código para revisarlo. El GITHUB_TOKEN de este job es de
+      # solo lectura: los comentarios los publica la GitHub App de Claude,
+      # no este token.
+      contents: read
+      pull-requests: read
+      issues: read
+      # La acción cambia este token OIDC por uno efímero de la GitHub App
+      # de Claude, que es quien de verdad publica los comentarios.
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
+
+      - name: Revisión de Claude
+        uses: anthropics/claude-code-action@v1
+        with:
+          # Camino de suscripción (`claude setup-token`). Para pagar por API
+          # en su lugar hay que cambiar la entrada Y el secreto a la vez:
+          # `anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}`.
+          # No son intercambiables. Ver docs/ci-revisor.md.
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR: ${{ github.event.pull_request.number }}
+
+            Eres el revisor adversarial de este repositorio. Lee PRIMERO
+            `review.md`, en la raíz, y síguelo al pie de la letra: qué cuenta
+            aquí como hallazgo grave, el tope de sugerencias menores por
+            revisión, dónde no debes reportar (incluido lo que ya vigila otra
+            comprobación de este repositorio) y la obligación de citar
+            `fichero:línea` en vez de deducir el comportamiento del nombre.
+
+            Actúa en modo adversarial: tu objetivo es REFUTAR el cambio, no
+            aprobarlo. Contrasta cada pieza tocada contra los scenarios de
+            `openspec/specs/<capability>/spec.md` cuando el cambio toque una
+            capability — la spec manda sobre lo que diga el código.
+
+            Eres estrictamente read-only respecto al código: no edites ningún
+            fichero, no propongas commits, no ejecutes nada que mute el
+            repositorio. Tu única salida son comentarios en este PR.
+
+            Publica cada hallazgo como comentario en línea sobre el fichero y
+            la línea que lo provoca, con severidad, evidencia (la cita
+            `fichero:línea`), archivo, línea y el comportamiento afectado.
+            Un hallazgo que no acabe publicado en el PR no existe: no lo
+            dejes solo en el log de esta ejecución.
+
+            No redirijas la salida de ningún comando a un fichero (nada de
+            `>`, `>>` ni `| tee`) y no la vuelvas a leer de un fichero
+            después: no tienes herramienta de escritura, así que el intento
+            se deniega sin devolverte nada y te cuesta un turno de los 40 que
+            tienes. Lee siempre la salida directa del comando.
+
+          # `Read`, `Grep` y `Glob` no son opcionales: sin ellas no puede
+          # abrir ni `review.md` ni un solo fichero del cambio, y cada
+          # intento denegado le gasta un turno sin darle nada a cambio. El
+          # comentario inline es su única salida.
+          claude_args: |
+            --model sonnet
+            --effort medium
+            --max-turns 40
+            --allowedTools "Read,Grep,Glob,mcp__github_inline_comment__create_inline_comment"
